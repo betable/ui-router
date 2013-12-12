@@ -20,8 +20,8 @@
  *
  * The `$stateProvider` provides interfaces to declare these states for your app.
  */
-$StateProvider.$inject = ['$urlRouterProvider', '$urlMatcherFactoryProvider', '$locationProvider'];
-function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $locationProvider) {
+$StateProvider.$inject = ['$urlRouterProvider', '$urlMatcherFactoryProvider', '$locationProvider', '$timeout'];
+function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $locationProvider, $timeout) {
 
   var root, states = {}, $state, queue = {}, abstractKey = 'abstract';
 
@@ -378,6 +378,12 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
 
     $state.go = function go(to, params, options) {
       return this.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
+    };
+
+    $state.goSoon = function go(to, params, options) {
+      $timeout( function() {
+          return this.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
+      })
     };
 
     $state.transitionTo = function transitionTo(to, toParams, options) {
