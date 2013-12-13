@@ -1439,6 +1439,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
     };
 
     $state.goSoon = function go(to, params, options) {
+      //So click events don't stop the propagation of the event
       self = this
       $timeout( function() {
           return self.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
