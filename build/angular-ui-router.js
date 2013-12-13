@@ -1439,6 +1439,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
     };
 
     $state.goSoon = function go(to, params, options) {
+      debugger
       $timeout( function() {
           return this.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
       })
