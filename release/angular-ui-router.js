@@ -1808,10 +1808,8 @@ function $ViewDirective(   $state,   $compile,   $controller,   $injector,   $an
         function updateView(doAnimate) {
           var locals = $state.$current && $state.$current.locals[name];
           if (locals === viewLocals) return; // nothing to do
-          var render = renderer(animate && doAnimate);
 
           // Remove existing content
-          //render.remove(element);
 
           // Destroy previous view scope
           if (viewScope) {
@@ -1824,13 +1822,11 @@ function $ViewDirective(   $state,   $compile,   $controller,   $injector,   $an
             view.state = null;
 
             // Restore the initial view
-            return render.restore(initialView, element);
           }
 
           viewLocals = locals;
           view.state = locals.$$state;
 
-          //var link = $compile(render.populate(locals.$template, element));
           var link = $compile(locals.$template)
           viewScope = scope.$new();
           viewScope.parent = locals.$$state
