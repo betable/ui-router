@@ -1,6 +1,6 @@
 /**
  * State-based routing for AngularJS
- * @version v0.2.11-dev-2014-01-17
+ * @version v0.2.14-dev-2014-01-24
  * @link http://angular-ui.github.com/
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -1438,11 +1438,11 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
       return this.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
     };
 
-    $state.goSoon = function go(to, params, options) {
+    $state.goSoon = function goSoon(to, params, options) {
       self = this
-      $timeout( function() {
-          return self.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
-      })
+      $state.go(to, params, options) 
+      return $timeout( function() {
+      }, 20)
     };
 
     $state.transitionTo = function transitionTo(to, toParams, options) {
