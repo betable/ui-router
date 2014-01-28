@@ -1,6 +1,6 @@
 /**
  * State-based routing for AngularJS
- * @version v0.2.14-dev-2014-01-24
+ * @version v0.2.14-dev-2014-01-28
  * @link http://angular-ui.github.com/
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -1808,6 +1808,7 @@ function $ViewDirective(   $state,   $compile,   $controller,   $injector,   $an
         function updateView(doAnimate) {
           var locals = $state.$current && $state.$current.locals[name];
           if (locals === viewLocals) return; // nothing to do
+          if (locals === undefined) return; // nothing to do
 
           // Remove existing content
 
