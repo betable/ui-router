@@ -380,11 +380,10 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
       return this.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
     };
 
-    $state.goSoon = function go(to, params, options) {
-      self = this
-      $timeout( function() {
-          return self.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
-      })
+    $state.goSoon = function goSoon(to, params, options) {
+      $state.go(to, params, options) 
+      return $timeout( function() {
+      }, 20)
     };
 
     $state.transitionTo = function transitionTo(to, toParams, options) {

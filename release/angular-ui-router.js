@@ -1,6 +1,6 @@
 /**
  * State-based routing for AngularJS
- * @version v0.2.8-dev-2013-12-12
+ * @version v0.2.16-dev-2014-02-21
  * @link http://angular-ui.github.com/
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -1438,11 +1438,10 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
       return this.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
     };
 
-    $state.goSoon = function go(to, params, options) {
-      self = this
-      $timeout( function() {
-          return self.transitionTo(to, params, extend({ inherit: true, relative: $state.$current }, options));
-      })
+    $state.goSoon = function goSoon(to, params, options) {
+      $state.go(to, params, options) 
+      return $timeout( function() {
+      }, 20)
     };
 
     $state.transitionTo = function transitionTo(to, toParams, options) {
@@ -1779,38 +1778,14 @@ function $ViewDirective(   $state,   $compile,   $controller,   $injector,   $an
             animate = $animator && $animator(scope, attr),
             initialView = transclude(scope);
 
-        // Returns a set of DOM manipulation functions based on whether animation
-        // should be performed
-        var renderer = function(doAnimate) {
-          return ({
-            "true": {
-              remove: function(element) { animate.leave(element.contents(), element); },
-              restore: function(compiled, element) { animate.enter(compiled, element); },
-              populate: function(template, element) {
-                var contents = angular.element('<div></div>').html(template).contents();
-                animate.enter(contents, element);
-                return contents;
-              }
-            },
-            "false": {
-              remove: function(element) { element.html(''); },
-              restore: function(compiled, element) { element.append(compiled); },
-              populate: function(template, element) {
-                element.html(template);
-                return element.contents();
-              }
-            }
-          })[doAnimate.toString()];
-        };
-
         // Put back the compiled initial view
         element.append(initialView);
 
         // Find the details of the parent view directive (if any) and use it
         // to derive our own qualified view name, then hang our own details
         // off the DOM so child directives can find it.
-        var parent = element.parent().inheritedData('$uiView');
-        if (name.indexOf('@') < 0) name  = name + '@' + (parent ? parent.state.name : '');
+        var parent = scope.parent ? scope.parent.name : ''
+        if (name.indexOf('@') < 0) name  = name + '@' + parent
         var view = { name: name, state: null };
         element.data('$uiView', view);
 
@@ -1832,10 +1807,9 @@ function $ViewDirective(   $state,   $compile,   $controller,   $injector,   $an
         function updateView(doAnimate) {
           var locals = $state.$current && $state.$current.locals[name];
           if (locals === viewLocals) return; // nothing to do
-          var render = renderer(animate && doAnimate);
+          if (locals === undefined) return; // nothing to do
 
           // Remove existing content
-          render.remove(element);
 
           // Destroy previous view scope
           if (viewScope) {
@@ -1848,34 +1822,40 @@ function $ViewDirective(   $state,   $compile,   $controller,   $injector,   $an
             view.state = null;
 
             // Restore the initial view
-            return render.restore(initialView, element);
           }
 
           viewLocals = locals;
           view.state = locals.$$state;
 
-          var link = $compile(render.populate(locals.$template, element));
+          var link = $compile(locals.$template)
           viewScope = scope.$new();
+          viewScope.parent = locals.$$state
 
           if (locals.$$controller) {
             locals.$scope = viewScope;
             var controller = $controller(locals.$$controller, locals);
             element.children().data('$ngControllerController', controller);
           }
-          link(viewScope);
-          viewScope.$emit('$viewContentLoaded');
-          if (onloadExp) viewScope.$eval(onloadExp);
+          link(viewScope, function(clonedElement, scope) {
+                setTimeout(function() {
+                    scope.$apply(function() {
+                        element.children().remove()
+                        element.append(clonedElement)
+                        scope.$emit('$viewContentLoaded');
+                        if (onloadExp) viewScope.$eval(onloadExp);
+                        // TODO: This seems strange, shouldn't $anchorScroll listen for $viewContentLoaded if necessary?
+                        // $anchorScroll might listen on event...
+                        $anchorScroll();
+                    })
+                }, 0)
+          });
 
-          // TODO: This seems strange, shouldn't $anchorScroll listen for $viewContentLoaded if necessary?
-          // $anchorScroll might listen on event...
-          $anchorScroll();
         }
       };
     }
   };
   return directive;
 }
-
 angular.module('ui.router.state').directive('uiView', $ViewDirective);
 
 function parseStateRef(ref) {
