@@ -1,6 +1,6 @@
 /**
  * State-based routing for AngularJS
- * @version v0.2.15-dev-2014-01-28
+ * @version v0.2.15-dev-2014-02-21
  * @link http://angular-ui.github.com/
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -1439,7 +1439,6 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
     };
 
     $state.goSoon = function goSoon(to, params, options) {
-      self = this
       $state.go(to, params, options) 
       return $timeout( function() {
       }, 20)
