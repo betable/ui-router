@@ -381,7 +381,6 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
     };
 
     $state.goSoon = function goSoon(to, params, options) {
-      self = this
       $state.go(to, params, options) 
       return $timeout( function() {
       }, 20)
